@@ -4,20 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using MichalNajwerLab2.Repository;
+using Microsoft.Extensions.Configuration;
 
 namespace MichalNajwerLab2.Controllers
 {
     public class HomeController : Controller
     {
-        List<Pizza> pizzaList;
+        private PizzaRepository pizzaRepository;
+        private OrderRepository orderRepository;
 
-        public HomeController()
+        public HomeController(IConfiguration config)
         {
-            pizzaList = new List<Pizza>();
-            pizzaList.Add(new Pizza(1, "Hawajska", 19.99, "Najlepsza pizza na świecie z ananasem", "hawajska.png"));
-            pizzaList.Add(new Pizza(2, "Pepperoni", 18.99, "Ostra pizzka z salami", "pepperoni.png"));
-            pizzaList.Add(new Pizza(3, "Grecka", 21.10, "Super pizza prosto z grecji z serem feta i pomidorami", "grecka.png"));
-            pizzaList.Add(new Pizza(4, "Capriciosa", 23.99, "Pyszna pizza z pieczarkami", "capriciosa.png"));
+            pizzaRepository = new PizzaRepository(config);
+            orderRepository = new OrderRepository(config);
         }
 
         public IActionResult Index()
@@ -31,6 +31,8 @@ namespace MichalNajwerLab2.Controllers
         /// <returns></returns>
         public IActionResult AllPizzas()
         {
+            var pizzaList = pizzaRepository.GetPizzas();
+
             return View(pizzaList);
         }
 
@@ -41,6 +43,8 @@ namespace MichalNajwerLab2.Controllers
         /// <returns></returns>
         public IActionResult PizzaDetails(int id)
         {
+            var pizzaList = pizzaRepository.GetPizzas();
+
             var pizza = pizzaList.FirstOrDefault(x => x.Id == id);
             return View(pizza);
         }
@@ -52,6 +56,8 @@ namespace MichalNajwerLab2.Controllers
         /// <returns></returns>
         public IActionResult CreateOrder(int id)
         {
+            var pizzaList = pizzaRepository.GetPizzas();
+
             var pizza = pizzaList.FirstOrDefault(x => x.Id == id);
             ViewBag.pizza = pizza;
             return View();
@@ -66,11 +72,14 @@ namespace MichalNajwerLab2.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult CreateOrder([Bind("PizzaId,City,Adress,Phone,Email")] Order order)
         {
+            var pizzaList = pizzaRepository.GetPizzas();
+
             if (ModelState.IsValid)
             {
                 order.OrderDate = DateTime.Now;
                 var pizza = pizzaList.FirstOrDefault(x => x.Id == order.PizzaId);
                 ViewBag.orderedPizza = pizza;
+                orderRepository.InsertOrder(order);
                 return View("PlacedOrder", order);
             }
             else
