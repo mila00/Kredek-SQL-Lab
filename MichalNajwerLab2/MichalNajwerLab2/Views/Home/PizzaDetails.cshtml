@@ -1,0 +1,19 @@
+﻿@model MichalNajwerLab2.Models.Pizza
+
+@{
+    ViewData["Title"] = "Szczegóły";
+}
+
+<h1>Szczegóły pizzy</h1>
+
+<h4>@Model.Name</h4>
+<h4>Numer: @Model.Id</h4>
+<img class="rounded" src="~/images/@Model.Image" style="height:20rem; width:35rem" />
+<h5>Opis pizzy: </h5>
+<p>@Model.Description</p>
+<h5 class="my-2">Cena: @Model.Price zł</h5>
+
+<input type="button" class="btn btn-primary" value="Zamów!" onclick="location.href='@Url.Action("CreateOrder", "Home", new {id = Model.Id})'" />
+
+<hr />
+<a asp-action="AllPizzas">Powrót</a>
